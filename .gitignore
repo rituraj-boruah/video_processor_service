@@ -1,0 +1,155 @@
+
+# ==========================================
+# Operating System
+# ==========================================
+
+*.dSYM
+.DS_Store
+Thumbs.db
+
+# ==========================================
+# Compiled files
+# ==========================================
+
+*.o
+*.obj
+*.gcno
+*.gcda
+*.exe
+*.dll
+*.so
+*.dylib
+*.a
+*.lib
+*.pdb
+*.ilk
+
+# ==========================================
+# CLion / JetBrains
+# ==========================================
+
+/.idea/
+/cmake-build-*/
+
+# ==========================================
+# Visual Studio / VS Code
+# ==========================================
+
+/.vs/
+/.vscode/
+/out/
+
+# ==========================================
+# CMake build artifacts
+# ==========================================
+
+/build*/
+/Debug/
+/Release/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
+CMakeUserPresets.json
+Makefile
+
+# ==========================================
+# clangd cache
+# ==========================================
+
+/.cache/
+
+# ==========================================
+# Fuzzers
+# ==========================================
+
+/tests/corpus_*
+/tests/parse_*_fuzzer
+
+# ==========================================
+# Documentation generated files
+# ==========================================
+
+/docs/docset/JSON_for_Modern_C++.docset/
+/docs/docset/JSON_for_Modern_C++.tgz
+/docs/docset/docSet.dsidx
+/docs/mkdocs/.cache/
+/docs/mkdocs/docs/__pycache__/
+/docs/mkdocs/site/
+/docs/mkdocs/venv/
+
+# ==========================================
+# serve_header
+# ==========================================
+
+/localhost.pem
+/localhost-key.pem
+/serve_header.yml
+
+# ==========================================
+# Swift Package Manager
+# ==========================================
+
+/.build/
+
+# ==========================================
+# Python environments
+# ==========================================
+
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# ==========================================
+# Bazel
+# ==========================================
+
+MODULE.bazel.lock
+
+# ==========================================
+# nlohmann JSON
+# ==========================================
+
+nlohmann_json.spdx
+
+# ==========================================
+# FFmpeg local distribution
+# ==========================================
+
+/ffmpeg-8.1-essentials_build/
+/ffmpeg.zip
+
+# ==========================================
+# Environment variables and secrets
+# ==========================================
+
+.env
+.env.*
+!.env.example
+
+# ==========================================
+# Logs and temporary files
+# ==========================================
+
+/logs/
+*.log
+/temp/
+*.tmp
+*.bak
+
+# ==========================================
+# Video processor generated output
+# ==========================================
+
+/data/output/
+
+# ==========================================
+# Local project backup
+# ==========================================
+# Full local nlohmann JSON source checkout
+/json-develop/
+
+# Large local test media
+/data/input/*.mp4
+/CMakeLists.backup.txt
