@@ -1,0 +1,83 @@
+
+name: Windows UCRT64 Build
+
+on:
+  push:
+    branches:
+      - main
+      - improve/reproducible-build
+
+  pull_request:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-build:
+    name: Build with MSYS2 UCRT64
+
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    steps:
+      # 1. Download repository source code
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      # 2. Configure MSYS2 UCRT64
+      - name: Setup MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+
+          install: >-
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-ninja
+            mingw-w64-ucrt-x86_64-redis-plus-plus
+            mingw-w64-ucrt-x86_64-hiredis
+            mingw-w64-ucrt-x86_64-pkgconf
+
+      # 3. Verify compiler and dependencies
+      - name: Check development environment
+        run: |
+          echo "===== GCC ====="
+          g++ --version
+
+          echo "===== CMAKE ====="
+          cmake --version
+
+          echo "===== NINJA ====="
+          ninja --version
+
+          echo "===== HIREDIS ====="
+          pkg-config --modversion hiredis
+
+          echo "===== REDIS PLUS PLUS ====="
+          pkg-config --modversion redis++
+
+      # 4. Configure CMake
+      - name: Configure project
+        run: |
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_PREFIX_PATH=/ucrt64
+
+      # 5. Compile the application
+      - name: Build project
+        run: |
+          cmake --build build --parallel
+
+      # 6. Verify executable generation
+      - name: Verify executable
+        run: |
+          test -f build/video_processor_service.exe
+          echo "Build completed successfully."
