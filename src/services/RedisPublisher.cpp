@@ -1,6 +1,6 @@
 #include "services/RedisPublisher.hpp"
 
-#include <nlohmann/json.hpp>
+#include "external/nlohmann/json.hpp"
 
 using json = nlohmann::json;
 
