@@ -1,3 +1,4 @@
+
 #include "core/Pipeline.h"
 #include "core/Encoder.h"
 #include "core/Segmenter.h"
@@ -6,71 +7,131 @@
 #include <iostream>
 #include <filesystem>
 #include <vector>
+#include <string>
+
 #include "utils/PlaylistGenerator.h"
 
 namespace fs = std::filesystem;
 
-bool Pipeline::run(const std::string& input) {
+bool Pipeline::run(
+    const std::string& input,
+    const std::string& outputDirectory
+) {
 
-    std::cout << " Pipeline started...\n";
+    std::cout << "Pipeline started...\n";
 
-    //  Extract videoId
-    std::string videoId = fs::path(input).stem().string();
+    // Step 1: Validate input
+    fs::path inputPath(input);
 
-    //  Base output folder
-    std::string baseOutput = "C:/dev_stream/video_processor/data/output/" + videoId;
+    if (!fs::exists(inputPath) ||
+        !fs::is_regular_file(inputPath)) {
 
-    //  Create directories
-    fs::create_directories(baseOutput + "/chunks");
+        std::cerr
+            << "Invalid input video: "
+            << input << "\n";
 
-    //  Master output path
-    std::string masterOutput = baseOutput + "/master.mp4";
-
-    // Create resolution folders
-    fs::create_directories(baseOutput + "/1080p");
-    fs::create_directories(baseOutput + "/720p");
-    fs::create_directories(baseOutput + "/480p");
-
-    // Step 1: Multi-resolution encode
-    if (!Encoder::encodeMultiple(input, baseOutput)) {
-        std::cout << " Multi-resolution encoding failed\n";
         return false;
     }
 
-    std::cout << " Multi-resolution encoding done\n";
+    // Step 2: Extract video ID
+    std::string videoId = inputPath.stem().string();
 
-    //  Step 2: Segment
-    std::vector<std::string> qualities = {"1080p", "720p", "480p"};
+    if (videoId.empty()) {
+        std::cerr << "Unable to extract video ID\n";
+        return false;
+    }
 
-    for (const auto& q : qualities) {
+    // Step 3: Configure output directory
+    fs::path outputRoot(outputDirectory);
 
-        std::string inputVideo = baseOutput + "/" + q + "/master.mp4";
-        std::string chunkDir   = baseOutput + "/" + q + "/chunks";
+    fs::path baseOutputPath = outputRoot / videoId;
 
-        fs::create_directories(chunkDir);
+    std::string baseOutput = baseOutputPath.string();
 
-        if (!Segmenter::segment(inputVideo, chunkDir)) {
-            std::cout << " Segmentation failed for " << q << "\n";
+    std::cout
+        << "Processing video: "
+        << videoId << "\n";
+
+    std::cout
+        << "Output location: "
+        << baseOutput << "\n";
+
+    // Step 4: Create directories
+    fs::create_directories(baseOutputPath / "chunks");
+
+    fs::create_directories(baseOutputPath / "1080p");
+    fs::create_directories(baseOutputPath / "720p");
+    fs::create_directories(baseOutputPath / "480p");
+
+    // Step 5: Multi-resolution encoding
+    if (!Encoder::encodeMultiple(input, baseOutput)) {
+
+        std::cerr
+            << "Multi-resolution encoding failed\n";
+
+        return false;
+    }
+
+    std::cout
+        << "Multi-resolution encoding completed\n";
+
+    // Step 6: Segmentation
+    std::vector<std::string> qualities = {
+        "1080p",
+        "720p",
+        "480p"
+    };
+
+    for (const auto& quality : qualities) {
+
+        fs::path inputVideo =
+            baseOutputPath / quality / "master.mp4";
+
+        fs::path chunkDirectory =
+            baseOutputPath / quality / "chunks";
+
+        fs::create_directories(chunkDirectory);
+
+        if (!Segmenter::segment(
+                inputVideo.string(),
+                chunkDirectory.string()
+            )) {
+
+            std::cerr
+                << "Segmentation failed for "
+                << quality << "\n";
+
             return false;
         }
     }
 
-    std::cout << " Chunking completed\n";
+    std::cout << "Chunking completed\n";
 
-    //  Step 3: Metadata
-    std::string metadataPath = baseOutput + "/metadata.json";
+    // Step 7: Generate metadata
+    fs::path metadataPath =
+        baseOutputPath / "metadata.json";
 
-    if (!MetadataGenerator::generateMulti(videoId, baseOutput, metadataPath)) {
-        std::cout << " Metadata generation failed\n";
+    if (!MetadataGenerator::generateMulti(
+            videoId,
+            baseOutput,
+            metadataPath.string()
+        )) {
+
+        std::cerr << "Metadata generation failed\n";
+
         return false;
     }
 
-    std::cout << " Metadata generated\n";
+    std::cout << "Metadata generated\n";
 
-// Step 4: Generate master HLS playlist
-generateMasterPlaylist(baseOutput);
+    // Step 8: Generate master HLS playlist
+    generateMasterPlaylist(baseOutput);
 
-std::cout << " Master playlist generated\n";
+    std::cout
+        << "Master playlist generation completed\n";
 
-return true;
+    std::cout
+        << "Pipeline completed successfully\n";
+
+    return true;
 }
