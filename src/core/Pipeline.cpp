@@ -67,7 +67,10 @@ bool Pipeline::run(const std::string& input) {
 
     std::cout << " Metadata generated\n";
 
+// Step 4: Generate master HLS playlist
+generateMasterPlaylist(baseOutput);
 
-    return true;
-    generateMasterPlaylist(baseOutput);
+std::cout << " Master playlist generated\n";
+
+return true;
 }
