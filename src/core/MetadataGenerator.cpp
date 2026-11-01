@@ -1,6 +1,6 @@
 #include "core/MetadataGenerator.h"
 #include "infra/FFprobeRunner.h"
-
+#include <algorithm>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -46,7 +46,8 @@ bool MetadataGenerator::generateMulti(const std::string& videoId,
         std::vector<std::string> chunks;
 
         for (const auto& entry : fs::directory_iterator(chunkDir)) {
-            if (entry.path().extension() == ".mp4") {
+            if (entry.is_regular_file() && entry.path().extension() == ".ts") {
+              
                 chunks.push_back(q + "/chunks/" + entry.path().filename().string());
             }
         }
